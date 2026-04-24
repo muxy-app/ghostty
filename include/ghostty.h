@@ -448,6 +448,12 @@ typedef struct {
   uint32_t default_fg;
   uint32_t default_bg;
   bool cursor_visible;
+  bool alt_screen;
+  bool cursor_keys;
+  bool bracketed_paste;
+  bool focus_event;
+  uint16_t mouse_event;
+  uint16_t mouse_format;
 } ghostty_cells_s;
 
 typedef enum {

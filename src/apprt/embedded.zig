@@ -1700,6 +1700,12 @@ pub const CAPI = struct {
         default_fg: u32,
         default_bg: u32,
         cursor_visible: bool,
+        alt_screen: bool,
+        cursor_keys: bool,
+        bracketed_paste: bool,
+        focus_event: bool,
+        mouse_event: u16,
+        mouse_format: u16,
     };
 
     const CellFlag = struct {
@@ -1758,6 +1764,12 @@ pub const CAPI = struct {
                 .default_fg = rgbPack(fg_eff),
                 .default_bg = rgbPack(bg_eff),
                 .cursor_visible = false,
+                .alt_screen = false,
+                .cursor_keys = false,
+                .bracketed_paste = false,
+                .focus_event = false,
+                .mouse_event = 0,
+                .mouse_format = 0,
             };
             return false;
         };
@@ -1833,6 +1845,35 @@ pub const CAPI = struct {
         const cursor_x: u32 = @intCast(screen.cursor.x);
         const cursor_y: u32 = @intCast(screen.cursor.y);
 
+        const alt_screen = t.modes.get(.alt_screen) or
+            t.modes.get(.alt_screen_legacy) or
+            t.modes.get(.alt_screen_save_cursor_clear_enter);
+        const cursor_keys = t.modes.get(.cursor_keys);
+        const bracketed_paste = t.modes.get(.bracketed_paste);
+        const focus_event = t.modes.get(.focus_event);
+
+        var mouse_event: u16 = 0;
+        if (t.modes.get(.mouse_event_any)) {
+            mouse_event = 1003;
+        } else if (t.modes.get(.mouse_event_button)) {
+            mouse_event = 1002;
+        } else if (t.modes.get(.mouse_event_normal)) {
+            mouse_event = 1000;
+        } else if (t.modes.get(.mouse_event_x10)) {
+            mouse_event = 9;
+        }
+
+        var mouse_format: u16 = 0;
+        if (t.modes.get(.mouse_format_sgr_pixels)) {
+            mouse_format = 1016;
+        } else if (t.modes.get(.mouse_format_sgr)) {
+            mouse_format = 1006;
+        } else if (t.modes.get(.mouse_format_urxvt)) {
+            mouse_format = 1015;
+        } else if (t.modes.get(.mouse_format_utf8)) {
+            mouse_format = 1005;
+        }
+
         out.* = .{
             .cells = out_cells.ptr,
             .cells_len = total,
@@ -1843,6 +1884,12 @@ pub const CAPI = struct {
             .default_fg = rgbPack(fg_eff),
             .default_bg = rgbPack(bg_eff),
             .cursor_visible = cursor_visible,
+            .alt_screen = alt_screen,
+            .cursor_keys = cursor_keys,
+            .bracketed_paste = bracketed_paste,
+            .focus_event = focus_event,
+            .mouse_event = mouse_event,
+            .mouse_format = mouse_format,
         };
         return true;
     }
