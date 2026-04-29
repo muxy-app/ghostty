@@ -64,10 +64,12 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           BRANCH="${{ steps.merge.outputs.branch }}"
-          if gh pr view "$BRANCH" --json number --jq .number >/dev/null 2>&1; then
+          REPO="${{ github.repository }}"
+          if gh pr view "$BRANCH" --repo "$REPO" --json number --jq .number >/dev/null 2>&1; then
             echo "PR already exists for $BRANCH; branch was force-updated."
           else
             gh pr create \
+              --repo "$REPO" \
               --base main \
               --head "$BRANCH" \
               --title "Sync upstream ($(date -u +%Y-%m-%d))" \
