@@ -40,8 +40,8 @@ jobs:
         if: steps.check.outputs.behind != '0'
         id: merge
         run: |
-          DATE=$(date -u +%Y-%m-%d)
-          BRANCH="sync/upstream-$DATE"
+          STAMP=$(date -u +%Y-%m-%d-%H%M%S)
+          BRANCH="sync/upstream-$STAMP"
           git checkout -b "$BRANCH"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
