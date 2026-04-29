@@ -25,6 +25,14 @@ jobs:
           cd macos
           tar czf GhosttyKit.xcframework.tar.gz GhosttyKit.xcframework/
 
+      - name: Stage runtime resources
+        run: |
+          mkdir -p resources-stage/ghostty
+          cp -R zig-out/share/ghostty/shell-integration resources-stage/ghostty/
+          cp -R zig-out/share/ghostty/themes resources-stage/ghostty/
+          cp -R zig-out/share/terminfo resources-stage/ghostty/
+          tar czf GhosttyKit-resources.tar.gz -C resources-stage ghostty
+
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,4 +50,5 @@ jobs:
             --title "GhosttyKit $(date -u +%Y-%m-%d)" \
             --latest \
             --notes "Built from commit ${COMMIT} on $(date -u +%Y-%m-%d)" \
-            macos/GhosttyKit.xcframework.tar.gz
+            macos/GhosttyKit.xcframework.tar.gz \
+            GhosttyKit-resources.tar.gz
