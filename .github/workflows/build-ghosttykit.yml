@@ -30,8 +30,8 @@ jobs:
           mkdir -p resources-stage/ghostty
           cp -R zig-out/share/ghostty/shell-integration resources-stage/ghostty/
           cp -R zig-out/share/ghostty/themes resources-stage/ghostty/
-          cp -R zig-out/share/terminfo resources-stage/ghostty/
-          tar czf GhosttyKit-resources.tar.gz -C resources-stage ghostty
+          cp -R zig-out/share/terminfo resources-stage/
+          tar czf GhosttyKit-resources.tar.gz -C resources-stage ghostty terminfo
 
       - name: Create release
         env:
