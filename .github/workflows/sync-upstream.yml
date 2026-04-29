@@ -56,15 +56,20 @@ jobs:
       - name: Push sync branch
         if: steps.check.outputs.behind != '0' && steps.merge.outputs.conflicts == 'false'
         run: |
-          git push --set-upstream origin "${{ steps.merge.outputs.branch }}"
+          git push --force-with-lease --set-upstream origin "${{ steps.merge.outputs.branch }}"
 
       - name: Open pull request
         if: steps.check.outputs.behind != '0' && steps.merge.outputs.conflicts == 'false'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          gh pr create \
-            --base main \
-            --head "${{ steps.merge.outputs.branch }}" \
-            --title "Sync upstream ($(date -u +%Y-%m-%d))" \
-            --body "Automated merge of \`ghostty-org/ghostty@main\` into \`main\`. Review the diff and merge if our customizations still compile and behave correctly. Trigger the Build GhosttyKit workflow on main after merging to refresh the xcframework."
+          BRANCH="${{ steps.merge.outputs.branch }}"
+          if gh pr view "$BRANCH" --json number --jq .number >/dev/null 2>&1; then
+            echo "PR already exists for $BRANCH; branch was force-updated."
+          else
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "Sync upstream ($(date -u +%Y-%m-%d))" \
+              --body "Automated merge of \`ghostty-org/ghostty@main\` into \`main\`. Review the diff and merge if our customizations still compile and behave correctly. Trigger the Build GhosttyKit workflow on main after merging to refresh the xcframework."
+          fi
